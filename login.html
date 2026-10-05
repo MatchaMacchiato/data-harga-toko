@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#133d2e">
+  <title>Login Admin — Daftar Harga Toko</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #195b42;
+      --primary-hover: #134633;
+      --primary-light: #e8f5ef;
+      --accent: #10b981;
+      --bg-dark: #0c1813;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --text-main: #18221e;
+      --text-muted: #5e6d65;
+      --border-color: #dbe3de;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0e1c16 0%, #152e23 50%, #0d1a14 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background glow */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0) 70%);
+      top: 10%;
+      left: 15%;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(40px);
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(36, 91, 68, 0.25) 0%, rgba(36, 91, 68, 0) 70%);
+      bottom: 10%;
+      right: 15%;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(40px);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #245b44, #10b981);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+      margin-bottom: 14px;
+    }
+
+    .brand-icon svg {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-header h1 {
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-header p {
+      color: #9cb3a7;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #eef2ef;
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      min-height: 46px;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-main);
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(25, 91, 66, 0.15);
+    }
+
+    .toggle-pwd {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-pwd:hover { color: var(--text-main); }
+
+    .btn-submit {
+      width: 100%;
+      min-height: 48px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(25, 91, 66, 0.25);
+      margin-top: 22px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 6px 16px rgba(25, 91, 66, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .alert.error {
+      display: block;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fca5a5;
+    }
+
+    .alert.success {
+      display: block;
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #86efac;
+    }
+
+    .alert.info {
+      display: block;
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .footer-actions {
+      margin-top: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .back-link {
+      color: #8fa59b;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #ffffff;
+    }
+
+    .config-toggle {
+      background: none;
+      border: none;
+      color: #8fa59b;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 4px;
+    }
+
+    .config-toggle:hover {
+      color: #ffffff;
+    }
+
+    /* Supabase Modal Config */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 18px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      padding: 26px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    }
+
+    .modal-card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #133d2e;
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .modal-card .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      background: #f1f5f3;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary-sm {
+      padding: 10px 18px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="brand-header">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <h1>Daftar Harga Toko</h1>
+      <p>Panel Autentikasi Pengelola & Admin Toko</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="tabs" role="tablist">
+        <button id="tab-login" class="tab-btn active" type="button" role="tab">Masuk Admin</button>
+        <button id="tab-signup" class="tab-btn" type="button" role="tab">Daftar Akun Baru</button>
+      </div>
+
+      <div id="alert-box" class="alert"></div>
+
+      <!-- FORM LOGIN -->
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email Admin</label>
+          <input id="login-email" type="email" placeholder="admin@toko.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Kata Sandi</label>
+          <div class="input-wrapper">
+            <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-pwd" data-target="login-password" aria-label="Lihat kata sandi">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button id="btn-login" class="btn-submit" type="submit">
+          <span class="btn-text">Masuk ke Panel Admin</span>
+        </button>
+      </form>
+
+      <!-- FORM REGISTER (SIGN UP) -->
+      <form id="signup-form" style="display: none;">
+        <div class="form-group">
+          <label for="signup-email">Email Baru</label>
+          <input id="signup-email" type="email" placeholder="admin@toko.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="signup-password">Kata Sandi (Minimal 6 Karakter)</label>
+          <div class="input-wrapper">
+            <input id="signup-password" type="password" minlength="6" placeholder="••••••••" required autocomplete="new-password">
+            <button type="button" class="toggle-pwd" data-target="signup-password" aria-label="Lihat kata sandi">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-confirm">Konfirmasi Kata Sandi</label>
+          <input id="signup-confirm" type="password" minlength="6" placeholder="••••••••" required autocomplete="new-password">
+        </div>
+
+        <button id="btn-signup" class="btn-submit" type="submit">
+          <span class="btn-text">Daftarkan Admin Baru</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="footer-actions">
+      <a href="index.html" class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+        Kembali ke Daftar Harga (Mode Publik)
+      </a>
+      <button id="btn-open-config" class="config-toggle" type="button">⚙️ Konfigurasi Kunci API Supabase</button>
+    </div>
+  </div>
+
+  <!-- Modal Konfigurasi Supabase -->
+  <div id="config-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <h2>Konfigurasi Koneksi Supabase</h2>
+      <p>Masukkan <strong>Project URL</strong> dan <strong>Anon Public Key</strong> dari dashboard Supabase Anda (Project Settings -> API).</p>
+      
+      <div class="form-group">
+        <label for="cfg-url">Supabase Project URL</label>
+        <input id="cfg-url" type="text" placeholder="https://xyzcompany.supabase.co">
+      </div>
+
+      <div class="form-group">
+        <label for="cfg-anon">Supabase Anon Key (public)</label>
+        <input id="cfg-anon" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-close-config" class="btn-secondary" type="button">Batal</button>
+        <button id="btn-save-config" class="btn-primary-sm" type="button">Simpan Konfigurasi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+
+  <script>
+    'use strict';
+
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const alertBox = document.getElementById('alert-box');
+
+    const configModal = document.getElementById('config-modal');
+    const btnOpenConfig = document.getElementById('btn-open-config');
+    const btnCloseConfig = document.getElementById('btn-close-config');
+    const btnSaveConfig = document.getElementById('btn-save-config');
+    const cfgUrlInput = document.getElementById('cfg-url');
+    const cfgAnonInput = document.getElementById('cfg-anon');
+
+    function showAlert(message, type = 'error') {
+      alertBox.textContent = message;
+      alertBox.className = 'alert ' + type;
+    }
+
+    function clearAlert() {
+      alertBox.className = 'alert';
+      alertBox.textContent = '';
+    }
+
+    // Toggle Tabs
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active');
+      tabSignup.classList.remove('active');
+      loginForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      clearAlert();
+    });
+
+    tabSignup.addEventListener('click', () => {
+      tabSignup.classList.add('active');
+      tabLogin.classList.remove('active');
+      signupForm.style.display = 'block';
+      loginForm.style.display = 'none';
+      clearAlert();
+    });
+
+    // Password visibility togglers
+    document.querySelectorAll('.toggle-pwd').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+      });
+    });
+
+    // Modal Config Handling
+    function populateConfigFields() {
+      const cfg = SupabaseStore.getConfig();
+      cfgUrlInput.value = cfg.url || 'https://iiykfcjlxvqlyzyjltro.supabase.co';
+      cfgAnonInput.value = cfg.anonKey || '';
+    }
+
+    btnOpenConfig.addEventListener('click', () => {
+      populateConfigFields();
+      configModal.classList.add('open');
+    });
+
+    btnCloseConfig.addEventListener('click', () => {
+      configModal.classList.remove('open');
+    });
+
+    btnSaveConfig.addEventListener('click', () => {
+      const url = cfgUrlInput.value.trim();
+      const anon = cfgAnonInput.value.trim();
+      if (!url) {
+        alert('URL Supabase tidak boleh kosong.');
+        return;
+      }
+      SupabaseStore.setConfig(url, anon);
+      configModal.classList.remove('open');
+      showAlert('Konfigurasi Supabase tersimpan! Silakan coba login kembali.', 'success');
+    });
+
+    // Handle Login Submit
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      clearAlert();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const submitBtn = document.getElementById('btn-login');
+
+      if (!SupabaseStore.isReady()) {
+        populateConfigFields();
+        configModal.classList.add('open');
+        showAlert('Supabase Anon Key belum diatur. Masukkan kunci API Anon di jendela konfigurasi.', 'info');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> <span>Memproses...</span>';
+
+      try {
+        const data = await SupabaseStore.signIn(email, password);
+        showAlert('Login berhasil! Mengalihkan ke panel toko...', 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 800);
+      } catch (err) {
+        console.error('Login error:', err);
+        showAlert(err.message || 'Gagal masuk. Periksa kembali email dan kata sandi Anda.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="btn-text">Masuk ke Panel Admin</span>';
+      }
+    });
+
+    // Handle Signup Submit
+    signupForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      clearAlert();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+      const submitBtn = document.getElementById('btn-signup');
+
+      if (password !== confirm) {
+        showAlert('Konfirmasi kata sandi tidak cocok.', 'error');
+        return;
+      }
+
+      if (!SupabaseStore.isReady()) {
+        populateConfigFields();
+        configModal.classList.add('open');
+        showAlert('Supabase Anon Key belum diatur. Masukkan kunci API terlebih dahulu.', 'info');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> <span>Mendaftarkan...</span>';
+
+      try {
+        const data = await SupabaseStore.signUp(email, password);
+        if (data.user && !data.session) {
+          showAlert('Pendaftaran berhasil! Silakan cek kotak masuk email Anda untuk konfirmasi aktivasi, lalu login.', 'success');
+        } else {
+          showAlert('Akun admin berhasil dibuat! Mengalihkan...', 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
+        }
+      } catch (err) {
+        console.error('Signup error:', err);
+        showAlert(err.message || 'Gagal mendaftar. Pastikan email valid dan belum terdaftar.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="btn-text">Daftarkan Admin Baru</span>';
+      }
+    });
+
+    // Auto check if already logged in
+    (async () => {
+      try {
+        const user = await SupabaseStore.getUser();
+        if (user) {
+          showAlert(`Anda sudah login sebagai ${user.email}. Mengalihkan ke halaman utama...`, 'info');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 900);
+        }
+      } catch {}
+    })();
+  </script>
+</body>
+</html>

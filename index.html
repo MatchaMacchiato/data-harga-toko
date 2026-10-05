@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#175741">
+  <title>Daftar Harga Toko</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link id="print-styles" rel="stylesheet" href="print.css" media="print">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js" defer></script>
+  <script src="pricing.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Print View Header Controls (only visible in print preview mode) -->
+  <div class="print-controls">
+    <a href="index.html">← Kembali ke daftar</a>
+    <button id="print-confirm" class="primary" type="button">Cetak / Simpan PDF</button>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="topbar no-print">
+    <div class="topbar-content">
+      <div class="brand-section">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Daftar Harga Toko</h1>
+          <p>Kalkulator Diskon & Cetak Label Harga</p>
+        </div>
+        <span id="sync-badge" class="badge badge-local" title="Status koneksi data">
+          <span class="badge-dot"></span>
+          <span id="sync-text">Mode Lokal</span>
+        </span>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Auth status injected here via app.js -->
+        <div id="auth-container">
+          <a href="login.html" class="btn-login-cta">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"></path>
+            </svg>
+            Login Admin
+          </a>
+        </div>
+
+        <button id="btn-open-settings" class="btn-icon-setting" type="button" title="Pengaturan Database Supabase">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Supabase DB</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div class="page-header no-print">
+    <div>
+      <h2>Kelola & Cetak Daftar Harga</h2>
+      <p>Hitung diskon bertingkat otomatis, bulatkan harga, dan cetak katalog produk.</p>
+    </div>
+    <p class="local-note" id="connection-note">Memeriksa koneksi database...</p>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+    <!-- Editor / Form Section -->
+    <aside class="editor no-print" aria-labelledby="editor-title">
+      <h2 id="editor-title">Tambah produk</h2>
+
+      <div id="guest-notice" class="guest-banner" hidden>
+        <p>🔒 <strong>Mode Tamu (Hanya Lihat):</strong> Masuk sebagai Admin untuk menambah, mengubah, atau menghapus produk di database.</p>
+        <a href="login.html">Masuk sebagai Admin →</a>
+      </div>
+
+      <form id="product-form" novalidate>
+        <label for="name">Nama produk</label>
+        <input id="name" maxlength="150" placeholder="Contoh: Kopi Bubuk Robusta 250g" autocomplete="off" required>
+
+        <label for="price">Harga awal <span>(Rp)</span></label>
+        <input id="price" inputmode="numeric" placeholder="Contoh: 16.700" aria-describedby="price-help" required>
+        <p class="hint" id="price-help">Gunakan rupiah utuh, dengan atau tanpa titik.</p>
+
+        <label for="discount">Diskon <span>(opsional)</span></label>
+        <input id="discount" placeholder="Contoh: 25%+10%" aria-describedby="discount-help" autocomplete="off">
+        <p class="hint" id="discount-help">Diskon bertingkat dihitung berurutan. Kosongkan jika tanpa diskon.</p>
+
+        <div class="calculation" aria-live="polite">
+          <div><span>Setelah diskon</span><output id="discounted">Belum dihitung</output></div>
+          <div class="final-price"><span>Harga jual akhir</span><output id="rounded">Rp0</output></div>
+          <p id="rounding-note">Dibulatkan ke atas per Rp500.</p>
+        </div>
+
+        <p id="form-error" class="error" role="alert" hidden></p>
+
+        <div class="form-actions">
+          <button id="save-product" class="primary" type="submit">Tambah ke daftar</button>
+          <button id="cancel-edit" type="button" hidden>Batal edit</button>
+        </div>
+      </form>
+
+      <details class="example">
+        <summary>Contoh simulasi diskon 25% + 10%</summary>
+        <p>Rp16.700 × 75% × 90% = Rp11.272,50.</p>
+        <p>Pembulatan Rp500 menjadi <strong>Rp11.500</strong>. Pembulatan Rp1.000 menjadi <strong>Rp12.000</strong>.</p>
+      </details>
+    </aside>
+
+    <!-- Price Table / Sheet Section -->
+    <section class="price-sheet" aria-labelledby="sheet-title">
+      <div class="sheet-toolbar no-print">
+        <div>
+          <h2>Daftar untuk dicetak</h2>
+          <p id="count">0 produk</p>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input id="search-input" type="search" placeholder="Cari nama produk..." aria-label="Cari nama produk">
+          </div>
+          <button id="print" class="primary" type="button" disabled>Cetak daftar harga</button>
+        </div>
+      </div>
+
+      <div class="settings no-print">
+        <div>
+          <label for="store">Nama toko <span>(opsional)</span></label>
+          <input id="store" maxlength="100" placeholder="Nama toko pada hasil cetak">
+        </div>
+        <div>
+          <label for="rounding">Pembulatan ke atas</label>
+          <select id="rounding">
+            <option value="500">Kelipatan Rp500</option>
+            <option value="1000">Kelipatan Rp1.000</option>
+          </select>
+        </div>
+        <label class="check">
+          <input id="print-details" type="checkbox"> Sertakan rincian diskon saat cetak
+        </label>
+      </div>
+
+      <p id="storage-error" class="error no-print" role="alert" hidden></p>
+
+      <div class="paper-heading">
+        <p id="store-heading" hidden></p>
+        <h2 id="sheet-title">Daftar harga jual</h2>
+        <p id="sheet-subtitle">Harga sudah dibulatkan ke atas per Rp500.</p>
+      </div>
+
+      <div id="empty" class="empty">
+        <h3>Daftar harga masih kosong</h3>
+        <p id="empty-subtext">Tambahkan produk lewat formulir atau masuk sebagai admin untuk mengelola katalog.</p>
+      </div>
+
+      <table id="price-table" hidden>
+        <caption class="sr-only">Daftar produk dan harga jual setelah diskon dan pembulatan</caption>
+        <thead>
+          <tr>
+            <th scope="col">Produk</th>
+            <th scope="col" class="detail-column">Harga awal</th>
+            <th scope="col" class="detail-column">Diskon</th>
+            <th scope="col" class="detail-column">Setelah diskon</th>
+            <th scope="col" class="number">Harga jual</th>
+            <th scope="col" class="no-print action-column"><span class="sr-only">Tindakan</span></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <p class="sheet-footnote">Harga dalam rupiah.</p>
+    </section>
+  </main>
+
+  <!-- Notification Status -->
+  <p id="status" class="status no-print" role="status" aria-live="polite">Memuat daftar harga…</p>
+
+  <!-- Modal Konfigurasi Supabase -->
+  <div id="settings-modal" class="modal-backdrop no-print">
+    <div class="modal-card">
+      <h2>⚙️ Konfigurasi Supabase DB</h2>
+      <p>Hubungkan aplikasi dengan database Supabase Anda agar harga tersimpan di cloud secara realtime.</p>
+      
+      <div class="form-group">
+        <label for="modal-cfg-url">Supabase Project URL</label>
+        <input id="modal-cfg-url" type="text" placeholder="https://xyzcompany.supabase.co">
+      </div>
+
+      <div class="form-group">
+        <label for="modal-cfg-anon">Supabase Anon Key (public)</label>
+        <input id="modal-cfg-anon" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+        <p class="hint">Dapatkan di: <strong>Supabase Dashboard → Project Settings → API</strong>.</p>
+      </div>
+
+      <div class="modal-actions btn-row">
+        <button id="modal-cfg-close" class="btn-icon-setting" type="button">Batal</button>
+        <button id="modal-cfg-save" class="primary" type="button">Simpan & Muat Ulang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Floating Notification -->
+  <div id="toast" class="toast-msg"></div>
+
+  <noscript>Aktifkan JavaScript di browser agar aplikasi dapat menghitung harga dan terhubung ke database.</noscript>
+</body>
+</html>
