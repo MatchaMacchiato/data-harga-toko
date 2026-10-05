@@ -7,7 +7,7 @@
   'use strict';
 
   // Konfigurasi bawaan (URL dari proyek Supabase Anda)
-  const DEFAULT_URL = 'https://iiykfcjlxvqlyzyjltro.supabase.co';
+  const DEFAULT_URL = 'https://tputztctrmtwnijyqaib.supabase.co';
   const STORAGE_KEY_URL = 'dht_supabase_url';
   const STORAGE_KEY_ANON = 'dht_supabase_anon_key';
 
