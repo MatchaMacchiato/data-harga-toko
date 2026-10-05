@@ -6,8 +6,9 @@
 (function (root) {
   'use strict';
 
-  // Konfigurasi bawaan (URL dari proyek Supabase Anda)
-  const DEFAULT_URL = 'https://tputztctrmtwnijyqaib.supabase.co';
+  // Konfigurasi bawaan (URL dan Publishable Key dari proyek Supabase Anda)
+  const DEFAULT_URL = 'https://tputztctrntwnijyqaib.supabase.co';
+  const DEFAULT_ANON_KEY = 'sb_publishable_Vu60sfWFBKlTKBeo3pyvJA_CRwmyZi7';
   const STORAGE_KEY_URL = 'dht_supabase_url';
   const STORAGE_KEY_ANON = 'dht_supabase_anon_key';
 
@@ -15,8 +16,18 @@
   let isConnected = false;
 
   function getConfig() {
-    const url = localStorage.getItem(STORAGE_KEY_URL) || (root.ENV && root.ENV.SUPABASE_URL) || DEFAULT_URL;
-    const anonKey = localStorage.getItem(STORAGE_KEY_ANON) || (root.ENV && root.ENV.SUPABASE_ANON_KEY) || '';
+    let url = localStorage.getItem(STORAGE_KEY_URL) || (root.ENV && root.ENV.SUPABASE_URL) || DEFAULT_URL;
+    let anonKey = localStorage.getItem(STORAGE_KEY_ANON) || (root.ENV && root.ENV.SUPABASE_ANON_KEY) || DEFAULT_ANON_KEY;
+    
+    // Pastikan jika ada URL lama atau anonKey kosong di browser, gunakan konfigurasi terbaru
+    if (!anonKey || anonKey === 'masukkan_supabase_anon_key_disini') {
+      anonKey = DEFAULT_ANON_KEY;
+      localStorage.setItem(STORAGE_KEY_ANON, DEFAULT_ANON_KEY);
+    }
+    if (!url || url.includes('tputztctrmtwnijyqaib') || url.includes('iiykfcjlxvqlyzyjltro')) {
+      url = DEFAULT_URL;
+      localStorage.setItem(STORAGE_KEY_URL, DEFAULT_URL);
+    }
     return { url, anonKey };
   }
 
