@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
   <meta name="theme-color" content="#175741">
   <title>Daftar Harga Toko</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +33,7 @@
         </div>
         <div class="brand-text">
           <h1>Daftar Harga Toko</h1>
-          <p>Kalkulator Diskon & Cetak Label Harga</p>
+          <p>Kalkulator Diskon & Cetak Label</p>
         </div>
         <span id="sync-badge" class="badge badge-local" title="Status koneksi data">
           <span class="badge-dot"></span>
@@ -48,7 +48,7 @@
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"></path>
             </svg>
-            Login Admin
+            <span>Login Admin</span>
           </a>
         </div>
 
@@ -57,13 +57,32 @@
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-          <span>Supabase DB</span>
+          <span class="setting-btn-text">Supabase</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Page Header -->
+  <!-- Mobile Segmented Tabs Navigation -->
+  <nav class="mobile-tabs no-print" aria-label="Navigasi tampilan ponsel">
+    <button id="mobile-tab-catalog" class="mobile-tab-btn active" type="button">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h7"></path>
+      </svg>
+      <span>Katalog Produk</span>
+      <span id="mobile-count-pill" class="mobile-badge">0</span>
+    </button>
+    <button id="mobile-tab-editor" class="mobile-tab-btn" type="button">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
+      <span id="mobile-tab-editor-text">Tambah Produk</span>
+    </button>
+  </nav>
+
+  <!-- Page Header (Desktop & Tablet) -->
   <div class="page-header no-print">
     <div>
       <h2>Kelola & Cetak Daftar Harga</h2>
@@ -75,17 +94,20 @@
   <!-- Main Workspace -->
   <main class="workspace">
     <!-- Editor / Form Section -->
-    <aside class="editor no-print" aria-labelledby="editor-title">
-      <h2 id="editor-title">Tambah produk</h2>
+    <aside id="editor-panel" class="editor no-print" aria-labelledby="editor-title">
+      <div class="editor-header-row">
+        <h2 id="editor-title">Tambah produk</h2>
+        <button id="btn-close-editor-mobile" class="btn-close-mobile no-print" type="button" aria-label="Tutup formulir">✕</button>
+      </div>
 
       <div id="guest-notice" class="guest-banner" hidden>
-        <p>🔒 <strong>Mode Tamu (Hanya Lihat):</strong> Masuk sebagai Admin untuk menambah, mengubah, atau menghapus produk di database.</p>
+        <p>🔒 <strong>Mode Tamu (Hanya Lihat):</strong> Masuk sebagai Admin untuk menyimpan atau mengubah harga produk.</p>
         <a href="login.html">Masuk sebagai Admin →</a>
       </div>
 
       <form id="product-form" novalidate>
         <label for="name">Nama produk</label>
-        <input id="name" maxlength="150" placeholder="Contoh: Kopi Bubuk Robusta 250g" autocomplete="off" required>
+        <input id="name" maxlength="150" placeholder="Contoh: Kopi Robusta 250g" autocomplete="off" required>
 
         <label for="price">Harga awal <span>(Rp)</span></label>
         <input id="price" inputmode="numeric" placeholder="Contoh: 16.700" aria-describedby="price-help" required>
@@ -117,7 +139,7 @@
     </aside>
 
     <!-- Price Table / Sheet Section -->
-    <section class="price-sheet" aria-labelledby="sheet-title">
+    <section id="sheet-panel" class="price-sheet" aria-labelledby="sheet-title">
       <div class="sheet-toolbar no-print">
         <div>
           <h2>Daftar untuk dicetak</h2>
@@ -131,27 +153,41 @@
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <input id="search-input" type="search" placeholder="Cari nama produk..." aria-label="Cari nama produk">
+            <button id="btn-clear-search" class="btn-clear-search" type="button" title="Hapus pencarian" hidden aria-label="Hapus pencarian">×</button>
           </div>
-          <button id="print" class="primary" type="button" disabled>Cetak daftar harga</button>
+          <button id="print" class="primary btn-print" type="button" disabled>
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <path d="M6 14h12v8H6z"></path>
+            </svg>
+            <span>Cetak PDF</span>
+          </button>
         </div>
       </div>
 
-      <div class="settings no-print">
-        <div>
-          <label for="store">Nama toko <span>(opsional)</span></label>
-          <input id="store" maxlength="100" placeholder="Nama toko pada hasil cetak">
+      <!-- Settings Accordion (Collapsible on mobile to save space) -->
+      <details class="settings-accordion no-print" open>
+        <summary>
+          <span class="settings-summary-title">⚙️ Pengaturan Toko & Pembulatan</span>
+          <span class="settings-summary-badge" id="settings-summary-preview">Rp500</span>
+        </summary>
+        <div class="settings">
+          <div>
+            <label for="store">Nama toko <span>(opsional)</span></label>
+            <input id="store" maxlength="100" placeholder="Nama toko pada hasil cetak">
+          </div>
+          <div>
+            <label for="rounding">Pembulatan ke atas</label>
+            <select id="rounding">
+              <option value="500">Kelipatan Rp500</option>
+              <option value="1000">Kelipatan Rp1.000</option>
+            </select>
+          </div>
+          <label class="check">
+            <input id="print-details" type="checkbox"> Sertakan rincian diskon saat cetak
+          </label>
         </div>
-        <div>
-          <label for="rounding">Pembulatan ke atas</label>
-          <select id="rounding">
-            <option value="500">Kelipatan Rp500</option>
-            <option value="1000">Kelipatan Rp1.000</option>
-          </select>
-        </div>
-        <label class="check">
-          <input id="print-details" type="checkbox"> Sertakan rincian diskon saat cetak
-        </label>
-      </div>
+      </details>
 
       <p id="storage-error" class="error no-print" role="alert" hidden></p>
 
@@ -166,6 +202,7 @@
         <p id="empty-subtext">Tambahkan produk lewat formulir atau masuk sebagai admin untuk mengelola katalog.</p>
       </div>
 
+      <!-- Table on Desktop, Cards on Mobile -->
       <table id="price-table" hidden>
         <caption class="sr-only">Daftar produk dan harga jual setelah diskon dan pembulatan</caption>
         <thead>
@@ -185,6 +222,15 @@
     </section>
   </main>
 
+  <!-- Mobile Floating Action Button (FAB) to Add Product -->
+  <button id="mobile-fab-add" class="mobile-fab no-print" type="button" aria-label="Tambah Produk Baru">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>Tambah Produk</span>
+  </button>
+
   <!-- Notification Status -->
   <p id="status" class="status no-print" role="status" aria-live="polite">Memuat daftar harga…</p>
 
@@ -201,7 +247,7 @@
 
       <div class="form-group">
         <label for="modal-cfg-anon">Supabase Anon Key (public)</label>
-        <input id="modal-cfg-anon" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+        <input id="modal-cfg-anon" type="text" placeholder="sb_publishable_... atau eyJhbGciOi...">
         <p class="hint">Dapatkan di: <strong>Supabase Dashboard → Project Settings → API</strong>.</p>
       </div>
 

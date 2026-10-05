@@ -36,7 +36,7 @@ function storageError(message) {
     $('storage-error').textContent = message;
     $('storage-error').hidden = false;
   }
-  const note = $('connection-note') || document.querySelector('.local-note');
+  const note = $('connection-note');
   if (note) note.textContent = 'Data sesi ini belum tersimpan ke cloud/lokal.';
 }
 
@@ -90,9 +90,34 @@ function preview() {
 
 function cell(text, className) {
   const td = document.createElement('td');
-  td.textContent = text;
+  if (text !== undefined && text !== '') td.textContent = text;
   if (className) td.className = className;
   return td;
+}
+
+// Mobile Tab Switcher
+function setMobileTab(tab) {
+  const editorPanel = $('editor-panel');
+  const sheetPanel = $('sheet-panel');
+  const tabCatalog = $('mobile-tab-catalog');
+  const tabEditor = $('mobile-tab-editor');
+  const fab = $('mobile-fab-add');
+
+  if (tab === 'editor') {
+    if (editorPanel) editorPanel.classList.add('mobile-active');
+    if (sheetPanel) sheetPanel.classList.remove('mobile-active');
+    if (tabEditor) tabEditor.classList.add('active');
+    if (tabCatalog) tabCatalog.classList.remove('active');
+    if (fab) fab.style.display = 'none';
+    if ($('name')) setTimeout(() => $('name').focus(), 100);
+  } else {
+    // catalog
+    if (editorPanel) editorPanel.classList.remove('mobile-active');
+    if (sheetPanel) sheetPanel.classList.add('mobile-active');
+    if (tabCatalog) tabCatalog.classList.add('active');
+    if (tabEditor) tabEditor.classList.remove('active');
+    if (fab) fab.style.display = 'inline-flex';
+  }
 }
 
 function render() {
@@ -102,6 +127,10 @@ function render() {
   }
   if ($('sheet-subtitle')) {
     $('sheet-subtitle').textContent = 'Harga sudah dibulatkan ke atas per ' + rupiah(state.rounding) + '.';
+  }
+  if ($('settings-summary-preview')) {
+    const storeLabel = state.store ? state.store + ' • ' : '';
+    $('settings-summary-preview').textContent = storeLabel + rupiah(state.rounding);
   }
 
   // Filter products by search query
@@ -118,6 +147,10 @@ function render() {
     }
   }
 
+  if ($('mobile-count-pill')) {
+    $('mobile-count-pill').textContent = String(state.products.length);
+  }
+
   if ($('empty')) $('empty').hidden = filtered.length > 0;
   if ($('price-table')) $('price-table').hidden = filtered.length === 0;
   if ($('print')) $('print').disabled = state.products.length === 0;
@@ -131,15 +164,32 @@ function render() {
     const result = Pricing.calculate(product.price, Pricing.parseDiscount(product.discount), state.rounding);
     const row = document.createElement('tr');
 
-    row.append(
-      cell(product.name),
-      cell(rupiah(product.price), 'detail-column'),
-      cell(product.discount || 'Tanpa diskon', 'detail-column'),
-      cell(rupiah(result.discounted), 'detail-column number'),
-      cell(rupiah(result.rounded), 'number sell-price')
-    );
+    // Product Name Cell (with desktop title and mobile sub-meta)
+    const nameTd = cell('', 'product-name-col');
+    const nameTitle = document.createElement('div');
+    nameTitle.className = 'product-name-title';
+    nameTitle.textContent = product.name;
 
-    const actions = cell('', 'no-print action-column');
+    const mobileMeta = document.createElement('div');
+    mobileMeta.className = 'mobile-product-meta';
+    if (product.discount) {
+      mobileMeta.textContent = `Awal: ${rupiah(product.price)} • Diskon: ${product.discount} (${rupiah(result.discounted)})`;
+    } else {
+      mobileMeta.textContent = `Harga awal: ${rupiah(product.price)} (Tanpa diskon)`;
+    }
+
+    nameTd.append(nameTitle, mobileMeta);
+
+    // Detail columns (visible on desktop)
+    const priceTd = cell(rupiah(product.price), 'detail-column');
+    const discountTd = cell(product.discount || 'Tanpa diskon', 'detail-column');
+    const discountedTd = cell(rupiah(result.discounted), 'detail-column number');
+
+    // Selling price column
+    const sellTd = cell(rupiah(result.rounded), 'number sell-price');
+
+    // Action column
+    const actionsTd = cell('', 'no-print action-column');
     if (isAdmin) {
       const group = document.createElement('div');
       group.className = 'row-actions';
@@ -147,7 +197,7 @@ function render() {
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
       editBtn.className = 'btn-edit-row';
-      editBtn.textContent = 'Edit';
+      editBtn.textContent = '✏️ Edit';
       editBtn.dataset.id = product.id;
       editBtn.dataset.action = 'edit';
       editBtn.setAttribute('aria-label', 'Edit ' + product.name);
@@ -155,18 +205,18 @@ function render() {
       const deleteBtn = document.createElement('button');
       deleteBtn.type = 'button';
       deleteBtn.className = 'btn-delete-row';
-      deleteBtn.textContent = 'Hapus';
+      deleteBtn.textContent = '🗑️ Hapus';
       deleteBtn.dataset.id = product.id;
       deleteBtn.dataset.action = 'delete';
       deleteBtn.setAttribute('aria-label', 'Hapus ' + product.name);
 
       group.append(editBtn, deleteBtn);
-      actions.append(group);
+      actionsTd.append(group);
     } else {
-      actions.innerHTML = '<span style="color:var(--muted);font-size:11px;">Hanya lihat</span>';
+      actionsTd.innerHTML = '<span style="color:var(--muted);font-size:11.5px;">Hanya lihat</span>';
     }
 
-    row.append(actions);
+    row.append(nameTd, priceTd, discountTd, discountedTd, sellTd, actionsTd);
     fragment.append(row);
   }
 
@@ -178,6 +228,7 @@ function resetForm() {
   editing = null;
   if ($('product-form')) $('product-form').reset();
   if ($('editor-title')) $('editor-title').textContent = 'Tambah produk';
+  if ($('mobile-tab-editor-text')) $('mobile-tab-editor-text').textContent = 'Tambah Produk';
   if ($('save-product')) $('save-product').textContent = currentUser ? 'Tambah ke daftar' : 'Simulasi Harga';
   if ($('cancel-edit')) $('cancel-edit').hidden = true;
   if ($('form-error')) $('form-error').hidden = true;
@@ -220,13 +271,13 @@ function updateAuthUI() {
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"></path>
           </svg>
-          Login Admin
+          <span>Login Admin</span>
         </a>
       `;
     }
     if (guestNotice) guestNotice.hidden = false;
     if (saveBtn) {
-      saveBtn.textContent = 'Simulasi Harga (Khusus Admin untuk Simpan)';
+      saveBtn.textContent = 'Simulasi Harga (Login untuk Simpan)';
     }
   }
   render();
@@ -243,7 +294,7 @@ function updateSyncUI(online) {
       badge.className = 'badge badge-cloud';
       badge.title = 'Terhubung ke database Cloud Supabase';
     }
-    if (text) text.textContent = 'Cloud Supabase';
+    if (text) text.textContent = 'Cloud';
     if (note) note.textContent = '🟢 Data tersinkron otomatis ke database Supabase.';
   } else {
     isCloudActive = false;
@@ -251,7 +302,7 @@ function updateSyncUI(online) {
       badge.className = 'badge badge-local';
       badge.title = 'Bekerja secara lokal di browser';
     }
-    if (text) text.textContent = 'Mode Lokal';
+    if (text) text.textContent = 'Lokal';
     if (note) note.textContent = '💾 Data tersimpan di browser ini. Bekerja tanpa internet.';
   }
 }
@@ -306,7 +357,13 @@ if ($('product-form')) {
       resetForm();
       render();
       notify(name + (wasEditing ? ' berhasil diperbarui.' : ' berhasil ditambahkan.'));
-      $('name').focus();
+
+      // Jika di layar mobile, kembali ke tab katalog setelah simpan
+      if (window.innerWidth <= 768) {
+        setMobileTab('catalog');
+      } else {
+        $('name').focus();
+      }
     } catch (error) {
       $('form-error').textContent = error.message;
       $('form-error').hidden = false;
@@ -336,10 +393,17 @@ if ($('rows')) {
       $('price').value = new Intl.NumberFormat('id-ID').format(product.price);
       $('discount').value = product.discount;
       $('editor-title').textContent = 'Edit produk';
+      if ($('mobile-tab-editor-text')) $('mobile-tab-editor-text').textContent = 'Edit Produk';
       $('save-product').textContent = 'Simpan perubahan';
       $('cancel-edit').hidden = false;
       $('form-error').hidden = true;
       preview();
+
+      // Jika di mobile, otomatis buka tab editor
+      if (window.innerWidth <= 768) {
+        setMobileTab('editor');
+      }
+
       $('name').focus();
       notify('Mengedit ' + product.name);
     } else if (button.dataset.action === 'delete') {
@@ -362,12 +426,49 @@ if ($('rows')) {
   });
 }
 
-// Search input listener
+// Search input and clear button listeners
 if ($('search-input')) {
   $('search-input').addEventListener('input', e => {
     searchQuery = e.target.value;
+    const clearBtn = $('btn-clear-search');
+    if (clearBtn) clearBtn.hidden = !searchQuery.trim();
     render();
   });
+}
+
+if ($('btn-clear-search')) {
+  $('btn-clear-search').addEventListener('click', () => {
+    searchQuery = '';
+    $('search-input').value = '';
+    $('btn-clear-search').hidden = true;
+    $('search-input').focus();
+    render();
+  });
+}
+
+// Mobile Tab Buttons & FAB
+if ($('mobile-tab-catalog')) {
+  $('mobile-tab-catalog').addEventListener('click', () => setMobileTab('catalog'));
+}
+if ($('mobile-tab-editor')) {
+  $('mobile-tab-editor').addEventListener('click', () => setMobileTab('editor'));
+}
+if ($('mobile-fab-add')) {
+  $('mobile-fab-add').addEventListener('click', () => setMobileTab('editor'));
+}
+if ($('btn-close-editor-mobile')) {
+  $('btn-close-editor-mobile').addEventListener('click', () => setMobileTab('catalog'));
+}
+
+// Settings Accordion Mobile toggle
+const settingsAcc = document.querySelector('.settings-accordion');
+if (settingsAcc) {
+  const summary = settingsAcc.querySelector('summary');
+  if (summary) {
+    summary.addEventListener('click', () => {
+      settingsAcc.classList.toggle('mobile-open');
+    });
+  }
 }
 
 // Real-time calculation inputs
@@ -378,7 +479,11 @@ for (const id of ['price', 'discount']) {
 if ($('cancel-edit')) {
   $('cancel-edit').addEventListener('click', () => {
     resetForm();
-    $('name').focus();
+    if (window.innerWidth <= 768) {
+      setMobileTab('catalog');
+    } else {
+      $('name').focus();
+    }
     notify('Edit dibatalkan.');
   });
 }
@@ -403,6 +508,10 @@ if ($('store')) {
     if ($('store-heading')) {
       $('store-heading').textContent = state.store;
       $('store-heading').hidden = !state.store.trim();
+    }
+    if ($('settings-summary-preview')) {
+      const storeLabel = state.store ? state.store + ' • ' : '';
+      $('settings-summary-preview').textContent = storeLabel + rupiah(state.rounding);
     }
   });
 
@@ -452,7 +561,7 @@ const btnSaveSettings = $('modal-cfg-save');
 if (btnOpenSettings && settingsModal) {
   btnOpenSettings.addEventListener('click', () => {
     const cfg = window.SupabaseStore ? window.SupabaseStore.getConfig() : {};
-    if ($('modal-cfg-url')) $('modal-cfg-url').value = cfg.url || 'https://iiykfcjlxvqlyzyjltro.supabase.co';
+    if ($('modal-cfg-url')) $('modal-cfg-url').value = cfg.url || 'https://tputztctrmtwnijyqaib.supabase.co';
     if ($('modal-cfg-anon')) $('modal-cfg-anon').value = cfg.anonKey || '';
     settingsModal.classList.add('open');
   });
@@ -481,6 +590,11 @@ if (btnOpenSettings && settingsModal) {
 async function initApp() {
   loadLocal();
 
+  // Set default view on mobile
+  if (window.innerWidth <= 768) {
+    setMobileTab('catalog');
+  }
+
   // Inisialisasi Auth & Supabase
   if (window.SupabaseStore && window.SupabaseStore.isReady()) {
     try {
@@ -492,11 +606,9 @@ async function initApp() {
         const cloudSettings = await window.SupabaseStore.fetchSettings();
 
         if (Array.isArray(cloudProducts)) {
-          // Jika di cloud sudah ada produk, gunakan data cloud
           if (cloudProducts.length > 0) {
             state.products = cloudProducts;
           } else if (state.products.length > 0 && currentUser) {
-            // Jika di cloud masih kosong tapi di lokal ada produk, sync ke cloud
             for (const p of state.products) {
               await window.SupabaseStore.addProduct(p).catch(() => {});
             }
