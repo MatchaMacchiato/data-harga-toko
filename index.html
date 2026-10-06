@@ -113,13 +113,46 @@
         <input id="price" inputmode="numeric" placeholder="Contoh: 16.700" aria-describedby="price-help" required>
         <p class="hint" id="price-help">Gunakan rupiah utuh, dengan atau tanpa titik.</p>
 
-        <label for="discount">Diskon <span>(opsional)</span></label>
-        <input id="discount" placeholder="Contoh: 25%+10%" aria-describedby="discount-help" autocomplete="off">
-        <p class="hint" id="discount-help">Diskon bertingkat dihitung berurutan. Kosongkan jika tanpa diskon.</p>
+        <!-- Penambahan / PPN -->
+        <label for="ppn">Penambahan / PPN <span>(opsional, %)</span></label>
+        <div class="input-with-presets">
+          <input id="ppn" placeholder="Contoh: 11% atau 12%" autocomplete="off">
+          <div class="preset-chips">
+            <button type="button" class="chip-btn" data-target="ppn" data-val="11%">+11% PPN</button>
+            <button type="button" class="chip-btn" data-target="ppn" data-val="12%">+12% PPN</button>
+            <button type="button" class="chip-btn" data-target="ppn" data-val="10%">+10%</button>
+            <button type="button" class="chip-clear" data-target="ppn" title="Hapus PPN">✕ Hapus</button>
+          </div>
+        </div>
+        <p class="hint">Persentase penambahan pajak (PPN) atau markup harga awal.</p>
+
+        <!-- Diskon / Pengurangan -->
+        <label for="discount">Diskon Pengurangan <span>(opsional, %)</span></label>
+        <div class="input-with-presets">
+          <input id="discount" placeholder="Contoh: 25%+10% atau 20%" aria-describedby="discount-help" autocomplete="off">
+          <div class="preset-chips">
+            <button type="button" class="chip-btn" data-target="discount" data-val="5%">-5%</button>
+            <button type="button" class="chip-btn" data-target="discount" data-val="10%">-10%</button>
+            <button type="button" class="chip-btn" data-target="discount" data-val="20%">-20%</button>
+            <button type="button" class="chip-btn" data-target="discount" data-val="25%+10%">-25%+10%</button>
+            <button type="button" class="chip-clear" data-target="discount" title="Hapus Diskon">✕ Hapus</button>
+          </div>
+        </div>
+        <p class="hint" id="discount-help">Diskon pengurangan berurutan. Kosongkan jika tanpa diskon.</p>
 
         <div class="calculation" aria-live="polite">
-          <div><span>Setelah diskon</span><output id="discounted">Belum dihitung</output></div>
-          <div class="final-price"><span>Harga jual akhir</span><output id="rounded">Rp0</output></div>
+          <div id="row-ppn" class="calc-row-ppn" hidden>
+            <span>Setelah PPN / Penambahan</span>
+            <output id="ppn-subtotal">Rp0</output>
+          </div>
+          <div>
+            <span id="label-after-adjust">Setelah diskon & penyesuaian</span>
+            <output id="discounted">Belum dihitung</output>
+          </div>
+          <div class="final-price">
+            <span>Harga jual akhir</span>
+            <output id="rounded">Rp0</output>
+          </div>
           <p id="rounding-note">Dibulatkan ke atas per Rp500.</p>
         </div>
 
@@ -132,9 +165,10 @@
       </form>
 
       <details class="example">
-        <summary>Contoh simulasi diskon 25% + 10%</summary>
-        <p>Rp16.700 × 75% × 90% = Rp11.272,50.</p>
-        <p>Pembulatan Rp500 menjadi <strong>Rp11.500</strong>. Pembulatan Rp1.000 menjadi <strong>Rp12.000</strong>.</p>
+        <summary>Contoh simulasi PPN +11% & Diskon 20% + 10%</summary>
+        <p>Harga awal Rp20.000 + PPN 11% = <strong>Rp22.200</strong>.</p>
+        <p>Diskon 20% + 10%: Rp22.200 × 80% × 90% = <strong>Rp15.984</strong>.</p>
+        <p>Pembulatan Rp500 menjadi <strong>Rp16.000</strong>.</p>
       </details>
     </aside>
 
@@ -209,7 +243,7 @@
           <tr>
             <th scope="col">Produk</th>
             <th scope="col" class="detail-column">Harga awal</th>
-            <th scope="col" class="detail-column">Diskon</th>
+            <th scope="col" class="detail-column">PPN / Diskon</th>
             <th scope="col" class="detail-column">Setelah diskon</th>
             <th scope="col" class="number">Harga jual</th>
             <th scope="col" class="no-print action-column"><span class="sr-only">Tindakan</span></th>

@@ -66,7 +66,10 @@ function loadLocal() {
 }
 
 function inputCalculation() {
-  return Pricing.calculate(Pricing.parsePrice($('price').value), Pricing.parseDiscount($('discount').value), state.rounding);
+  const ppnVal = $('ppn') ? $('ppn').value : '';
+  const discVal = $('discount') ? $('discount').value : '';
+  const combined = Pricing.combineAdjustmentString(ppnVal, discVal);
+  return Pricing.calculate(Pricing.parsePrice($('price').value), Pricing.parseDiscount(combined), state.rounding);
 }
 
 function preview() {
@@ -74,15 +77,23 @@ function preview() {
     $('rounding-note').textContent = 'Dibulatkan ke atas per ' + rupiah(state.rounding) + '.';
   }
   if (!$('price') || !$('price').value.trim()) {
+    if ($('row-ppn')) $('row-ppn').hidden = true;
     if ($('discounted')) $('discounted').textContent = 'Belum dihitung';
     if ($('rounded')) $('rounded').textContent = 'Rp0';
     return;
   }
   try {
     const result = inputCalculation();
-    if ($('discounted')) $('discounted').textContent = rupiah(result.discounted);
+    if (result.hasAddition && $('row-ppn')) {
+      $('row-ppn').hidden = false;
+      $('ppn-subtotal').textContent = rupiah(result.afterAdd);
+    } else if ($('row-ppn')) {
+      $('row-ppn').hidden = true;
+    }
+    if ($('discounted')) $('discounted').textContent = rupiah(result.adjusted);
     if ($('rounded')) $('rounded').textContent = rupiah(result.rounded);
   } catch {
+    if ($('row-ppn')) $('row-ppn').hidden = true;
     if ($('discounted')) $('discounted').textContent = 'Periksa input';
     if ($('rounded')) $('rounded').textContent = 'Belum valid';
   }
@@ -163,6 +174,7 @@ function render() {
   for (const product of filtered) {
     const result = Pricing.calculate(product.price, Pricing.parseDiscount(product.discount), state.rounding);
     const row = document.createElement('tr');
+    const labelAdjust = Pricing.formatAdjustmentLabel(product.discount);
 
     // Product Name Cell (with desktop title and mobile sub-meta)
     const nameTd = cell('', 'product-name-col');
@@ -173,7 +185,7 @@ function render() {
     const mobileMeta = document.createElement('div');
     mobileMeta.className = 'mobile-product-meta';
     if (product.discount) {
-      mobileMeta.textContent = `Awal: ${rupiah(product.price)} • Diskon: ${product.discount} (${rupiah(result.discounted)})`;
+      mobileMeta.textContent = `Awal: ${rupiah(product.price)} • ${labelAdjust} (${rupiah(result.adjusted)})`;
     } else {
       mobileMeta.textContent = `Harga awal: ${rupiah(product.price)} (Tanpa diskon)`;
     }
@@ -182,8 +194,8 @@ function render() {
 
     // Detail columns (visible on desktop)
     const priceTd = cell(rupiah(product.price), 'detail-column');
-    const discountTd = cell(product.discount || 'Tanpa diskon', 'detail-column');
-    const discountedTd = cell(rupiah(result.discounted), 'detail-column number');
+    const discountTd = cell(labelAdjust, 'detail-column');
+    const discountedTd = cell(rupiah(result.adjusted), 'detail-column number');
 
     // Selling price column
     const sellTd = cell(rupiah(result.rounded), 'number sell-price');
@@ -227,6 +239,9 @@ function render() {
 function resetForm() {
   editing = null;
   if ($('product-form')) $('product-form').reset();
+  if ($('ppn')) $('ppn').value = '';
+  if ($('discount')) $('discount').value = '';
+  if ($('row-ppn')) $('row-ppn').hidden = true;
   if ($('editor-title')) $('editor-title').textContent = 'Tambah produk';
   if ($('mobile-tab-editor-text')) $('mobile-tab-editor-text').textContent = 'Tambah Produk';
   if ($('save-product')) $('save-product').textContent = currentUser ? 'Tambah ke daftar' : 'Simulasi Harga';
@@ -323,10 +338,13 @@ if ($('product-form')) {
       if (!name) { $('name').focus(); throw new Error('Isi nama produk terlebih dahulu.'); }
       if (name.length > 150) throw new Error('Nama produk maksimal 150 karakter.');
       const price = Pricing.parsePrice($('price').value);
-      Pricing.parseDiscount($('discount').value);
+      const ppnVal = $('ppn') ? $('ppn').value.trim() : '';
+      const discVal = $('discount') ? $('discount').value.trim() : '';
+      const combinedDiscount = Pricing.combineAdjustmentString(ppnVal, discVal);
+      Pricing.parseDiscount(combinedDiscount);
 
       const productId = editing || ('p-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8));
-      const product = { id: productId, name, price, discount: $('discount').value.trim() };
+      const product = { id: productId, name, price, discount: combinedDiscount };
       const wasEditing = Boolean(editing);
 
       $('save-product').disabled = true;
@@ -391,7 +409,11 @@ if ($('rows')) {
       editing = product.id;
       $('name').value = product.name;
       $('price').value = new Intl.NumberFormat('id-ID').format(product.price);
-      $('discount').value = product.discount;
+
+      const split = Pricing.splitAdjustmentString(product.discount);
+      if ($('ppn')) $('ppn').value = split.ppn;
+      if ($('discount')) $('discount').value = split.discount;
+
       $('editor-title').textContent = 'Edit produk';
       if ($('mobile-tab-editor-text')) $('mobile-tab-editor-text').textContent = 'Edit Produk';
       $('save-product').textContent = 'Simpan perubahan';
@@ -471,8 +493,32 @@ if (settingsAcc) {
   }
 }
 
+// Preset chips click listeners
+document.querySelectorAll('.chip-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const val = btn.dataset.val;
+    const input = $(targetId);
+    if (!input) return;
+    input.value = val;
+    preview();
+    input.focus();
+  });
+});
+
+document.querySelectorAll('.chip-clear').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const input = $(targetId);
+    if (!input) return;
+    input.value = '';
+    preview();
+    input.focus();
+  });
+});
+
 // Real-time calculation inputs
-for (const id of ['price', 'discount']) {
+for (const id of ['price', 'ppn', 'discount']) {
   if ($(id)) $(id).addEventListener('input', preview);
 }
 

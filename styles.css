@@ -461,12 +461,64 @@ button:disabled {
   outline-offset: 2px;
 }
 
+.input-with-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-top: 2px;
+}
+.chip-btn {
+  min-height: 28px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 1px solid #c4d0c7;
+  background: #f1f4f1;
+  color: #1a382b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.chip-clear {
+  min-height: 28px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b3a3a;
+  border: 1px dashed #dca8a8;
+  background: #fff5f5;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.chip-clear:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
 .calculation {
   margin: 16px 0;
   padding: 14px 16px;
   background: var(--surface-alt);
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
+}
+.calc-row-ppn {
+  color: #065f46;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 .calculation div {
   display: flex;
